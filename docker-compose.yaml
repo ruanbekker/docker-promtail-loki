@@ -13,7 +13,7 @@ services:
       - app
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:9.3.6
     ports:
       - 3000:3000
     volumes:
@@ -26,7 +26,7 @@ services:
       - app
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:2.7.4
     ports:
       - 3100:3100
     command: -config.file=/etc/loki/local-config.yaml
@@ -34,7 +34,7 @@ services:
       - app
 
   promtail:
-    image:  grafana/promtail:latest
+    image:  grafana/promtail:2.7.4
     container_name: promtail
     volumes:
       - ./config/promtail.yaml:/etc/promtail/docker-config.yaml
