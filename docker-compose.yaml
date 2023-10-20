@@ -1,5 +1,13 @@
 version: '3.8'
 
+x-logging:
+  &default-logging
+  driver: "json-file"
+  options:
+    max-size: "1m"
+    max-file: "1"
+    tag: "{{.Name}}"
+
 services:
   nginx-app:
     container_name: nginx-app
@@ -11,6 +19,7 @@ services:
       - 8080:80
     networks:
       - app
+    logging: *default-logging
 
   grafana:
     image: grafana/grafana:9.3.6
@@ -24,6 +33,7 @@ services:
       - GF_AUTH_DISABLE_LOGIN_FORM=true
     networks:
       - app
+    logging: *default-logging
 
   loki:
     image: grafana/loki:2.7.4
@@ -32,6 +42,7 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - app
+    logging: *default-logging
 
   promtail:
     image:  grafana/promtail:2.7.4
@@ -45,6 +56,7 @@ services:
       - loki
     networks:
       - app
+    logging: *default-logging
 
 networks:
   app:
