@@ -6,7 +6,7 @@ Docker Compose Stack with Grafana Loki and Promtail
 Start the stack with:
 
 ```bash
-docker-compose up -d
+make up
 ```
 
 Access nginx on http://localhost:8080
