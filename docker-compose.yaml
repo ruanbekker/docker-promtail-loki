@@ -37,7 +37,7 @@ services:
     logging: *default-logging
 
   loki:
-    image: grafana/loki:2.7.4
+    image: grafana/loki:2.9.2
     container_name: loki
     ports:
       - 3100:3100
@@ -47,7 +47,7 @@ services:
     logging: *default-logging
 
   promtail:
-    image:  grafana/promtail:2.7.4
+    image:  grafana/promtail:2.9.2
     container_name: promtail
     volumes:
       - ./config/promtail.yaml:/etc/promtail/docker-config.yaml
