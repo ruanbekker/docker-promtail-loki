@@ -27,11 +27,14 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./config/grafana/datasources/grafana.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./config/grafana/plugins/app.yaml:/etc/grafana/provisioning/plugins/app.yaml
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_FEATURE_TOGGLES_ENABLE=accessControlOnCall lokiLogsDataplane
+      - GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
     networks:
       - app
     logging: *default-logging
@@ -43,7 +46,7 @@ services:
       - 3100:3100
     command: -config.file=/etc/loki/loki.yaml
     volumes:
-      - ./config/loki.yaml:/etc/loki/loki.yaml
+      - ./config/loki/loki.yaml:/etc/loki/loki.yaml
     networks:
       - app
     logging: *default-logging
@@ -52,10 +55,20 @@ services:
     image:  grafana/promtail:3.0.0
     container_name: promtail
     volumes:
-      - ./config/promtail.yaml:/etc/promtail/docker-config.yaml
+      - ./config/promtail/promtail.yaml:/etc/promtail/docker-config.yaml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
     command: -config.file=/etc/promtail/docker-config.yaml
+    depends_on:
+      - loki
+    networks:
+      - app
+    logging: *default-logging
+
+  log-generator:
+    image: us-docker.pkg.dev/grafanalabs-global/docker-explore-logs-prod/fake-log-generator:latest
+    container_name: log-generator
+    command: -url http://loki:3100/loki/api/v1/push
     depends_on:
       - loki
     networks:
