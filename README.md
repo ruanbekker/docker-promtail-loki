@@ -1,5 +1,5 @@
 # docker-promtail-loki
-Docker Compose Stack with Grafana Loki and Promtail
+Docker Compose Stack with Grafana Loki, Promtail and the Grafana [Explore Logs](https://grafana.com/blog/2024/04/09/find-your-logs-data-with-explore-logs-no-logql-required/) plugin.
 
 ## Usage
 
