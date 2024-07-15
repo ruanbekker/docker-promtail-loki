@@ -1,6 +1,10 @@
 # docker-promtail-loki
 Docker Compose Stack with Grafana Loki, Promtail and the Grafana [Explore Logs](https://grafana.com/blog/2024/04/09/find-your-logs-data-with-explore-logs-no-logql-required/) plugin.
 
+> [!NOTE]  
+> For a full example with prometheus, alertmanager, cadvisor, node-exporter and loki, please see the following repo:
+> - https://github.com/ruanbekker/docker-monitoring-stack-gpnc
+
 ## Usage
 
 Start the stack with:
