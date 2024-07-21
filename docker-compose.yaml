@@ -18,6 +18,7 @@ services:
   nginx-app:
     container_name: nginx-app
     image: nginx
+    restart: unless-stopped
     labels:
       logging: "promtail"
       logging_jobname: "containerlogs"
@@ -30,6 +31,7 @@ services:
   grafana:
     image: grafana/grafana:11.0.0
     container_name: grafana
+    restart: unless-stopped
     ports:
       - 3000:3000
     volumes:
@@ -50,6 +52,7 @@ services:
   loki:
     image: grafana/loki:3.0.0
     container_name: loki
+    restart: unless-stopped
     ports:
       - 3100:3100
     command: -config.file=/etc/loki/loki.yaml
@@ -64,6 +67,7 @@ services:
   promtail:
     image:  grafana/promtail:3.0.0
     container_name: promtail
+    restart: unless-stopped
     volumes:
       - ./config/promtail/promtail.yaml:/etc/promtail/docker-config.yaml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -79,6 +83,7 @@ services:
   log-generator:
     image: us-docker.pkg.dev/grafanalabs-global/docker-explore-logs-prod/fake-log-generator:latest
     container_name: log-generator
+    restart: unless-stopped
     command: -url http://loki:3100/loki/api/v1/push
     depends_on:
       - loki
