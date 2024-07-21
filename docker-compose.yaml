@@ -8,27 +8,37 @@ x-logging:
     max-file: "1"
     tag: "{{.Name}}"
 
+volumes:
+  loki:
+  promtail:
+  grafana:
+  grafana-provisioning:
+
 services:
   nginx-app:
     container_name: nginx-app
     image: nginx
+    restart: unless-stopped
     labels:
       logging: "promtail"
       logging_jobname: "containerlogs"
     ports:
       - 8080:80
     networks:
-      - app
+      - loki
     logging: *default-logging
 
   grafana:
     image: grafana/grafana:11.0.0
     container_name: grafana
+    restart: unless-stopped
     ports:
       - 3000:3000
     volumes:
       - ./config/grafana/datasources/grafana.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
       - ./config/grafana/plugins/app.yaml:/etc/grafana/provisioning/plugins/app.yaml
+      - grafana:/var/lib/grafana
+      - grafana-provisioning:/etc/grafana/provisioning
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
@@ -36,45 +46,50 @@ services:
       - GF_FEATURE_TOGGLES_ENABLE=accessControlOnCall lokiLogsDataplane
       - GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
     networks:
-      - app
+      - loki
     logging: *default-logging
 
   loki:
     image: grafana/loki:3.0.0
     container_name: loki
+    restart: unless-stopped
     ports:
       - 3100:3100
     command: -config.file=/etc/loki/loki.yaml
     volumes:
       - ./config/loki/loki.yaml:/etc/loki/loki.yaml
+      - loki:/etc/loki
+
     networks:
-      - app
+      - loki
     logging: *default-logging
 
   promtail:
     image:  grafana/promtail:3.0.0
     container_name: promtail
+    restart: unless-stopped
     volumes:
       - ./config/promtail/promtail.yaml:/etc/promtail/docker-config.yaml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
+      - promtail:/etc/promtail
     command: -config.file=/etc/promtail/docker-config.yaml
     depends_on:
       - loki
     networks:
-      - app
+      - loki
     logging: *default-logging
 
   log-generator:
     image: us-docker.pkg.dev/grafanalabs-global/docker-explore-logs-prod/fake-log-generator:latest
     container_name: log-generator
+    restart: unless-stopped
     command: -url http://loki:3100/loki/api/v1/push
     depends_on:
       - loki
     networks:
-      - app
+      - loki
     logging: *default-logging
 
 networks:
-  app:
-    name: app
+  loki:
