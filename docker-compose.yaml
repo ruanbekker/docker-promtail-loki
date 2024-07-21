@@ -9,10 +9,10 @@ x-logging:
     tag: "{{.Name}}"
 
 volumes:
-  - loki
-  - promtail
-  - grafana
-  - grafana-provisioning
+  loki:
+  promtail:
+  grafana:
+  grafana-provisioning:
 
 services:
   nginx-app:
@@ -25,7 +25,7 @@ services:
     ports:
       - 8080:80
     networks:
-      - app
+      - loki
     logging: *default-logging
 
   grafana:
@@ -46,7 +46,7 @@ services:
       - GF_FEATURE_TOGGLES_ENABLE=accessControlOnCall lokiLogsDataplane
       - GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
     networks:
-      - app
+      - loki
     logging: *default-logging
 
   loki:
@@ -61,7 +61,7 @@ services:
       - loki:/etc/loki
 
     networks:
-      - app
+      - loki
     logging: *default-logging
 
   promtail:
@@ -77,7 +77,7 @@ services:
     depends_on:
       - loki
     networks:
-      - app
+      - loki
     logging: *default-logging
 
   log-generator:
@@ -88,9 +88,8 @@ services:
     depends_on:
       - loki
     networks:
-      - app
+      - loki
     logging: *default-logging
 
 networks:
-  app:
-    name: app
+  loki:
