@@ -8,6 +8,12 @@ x-logging:
     max-file: "1"
     tag: "{{.Name}}"
 
+volumes:
+  - loki
+  - promtail
+  - grafana
+  - grafana-provisioning
+
 services:
   nginx-app:
     container_name: nginx-app
@@ -29,6 +35,8 @@ services:
     volumes:
       - ./config/grafana/datasources/grafana.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
       - ./config/grafana/plugins/app.yaml:/etc/grafana/provisioning/plugins/app.yaml
+      - grafana:/var/lib/grafana
+      - grafana-provisioning:/etc/grafana/provisioning
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
@@ -47,6 +55,8 @@ services:
     command: -config.file=/etc/loki/loki.yaml
     volumes:
       - ./config/loki/loki.yaml:/etc/loki/loki.yaml
+      - loki:/etc/loki
+
     networks:
       - app
     logging: *default-logging
@@ -58,6 +68,7 @@ services:
       - ./config/promtail/promtail.yaml:/etc/promtail/docker-config.yaml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
+      - promtail:/etc/promtail
     command: -config.file=/etc/promtail/docker-config.yaml
     depends_on:
       - loki
